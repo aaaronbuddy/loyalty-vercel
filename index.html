@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新 Loyalty 上線倒數！！</title>
+  <style>
+    * { margin:0; padding:0; box-sizing: border-box; }
+    html, body {
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft YaHei", sans-serif;
+      background: #0a0a1a;
+      color: #fff;
+    }
+    .tv {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      position: relative;
+    }
+
+    /* ── Header ── */
+    .hdr {
+      text-align: center;
+      padding: 1.2vh 2vw 0.5vh;
+      flex-shrink: 0;
+    }
+    .hdr h1 {
+      font-size: clamp(1.4rem, 3.5vh, 3rem);
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: pulse 2.5s ease-in-out infinite;
+      margin: 0;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity:1; }
+      50% { transform: scale(1.04); opacity:0.92; }
+    }
+
+    /* ── Countdown ── */
+    .cd {
+      text-align: center;
+      padding: 0.5vh 2vw 1vh;
+      flex-shrink: 0;
+    }
+    .cd p {
+      font-size: clamp(0.8rem, 1.8vh, 1.1rem);
+      color: #a0a0c0;
+      margin-bottom: 1vh;
+    }
+    .timer {
+      display: flex;
+      gap: clamp(8px, 1.5vw, 20px);
+      justify-content: center;
+    }
+    .tb {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: clamp(8px,1.2vw,16px);
+      padding: clamp(6px,1.2vh,20px) clamp(10px,2vw,28px);
+      min-width: clamp(55px, 8vw, 110px);
+      backdrop-filter: blur(8px);
+    }
+    .tb .n {
+      font-size: clamp(1.6rem, 5vh, 3.2rem);
+      font-weight: 700;
+      color: #ffd93d;
+      line-height: 1.1;
+    }
+    .tb .l {
+      font-size: clamp(0.55rem, 1vh, 0.85rem);
+      color: #8888aa;
+      margin-top: 0.4vh;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Image Area ── */
+    .img-area {
+      flex: 1;
+      min-height: 0;
+      padding: 0.5vh 2vw 0.5vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .img-area h3 {
+      font-size: clamp(0.7rem, 1.2vh, 1rem);
+      color: #7777aa;
+      text-align: center;
+      margin-bottom: 0.6vh;
+      flex-shrink: 0;
+    }
+    .img-wrap {
+      flex: 1;
+      min-height: 0;
+      background: rgba(0,0,0,0.35);
+      border-radius: clamp(8px,1.2vw,14px);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .img-wrap .ph {
+      color: #444;
+      font-size: clamp(0.8rem, 1.5vh, 1.1rem);
+      text-align: center;
+      padding: 1rem;
+    }
+
+    /* ── Upload overlay ── */
+    .upload-fab {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+    .upload-fab label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      color: #bbb;
+      cursor: pointer;
+      font-size: 0.78rem;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    .upload-fab label:hover {
+      background: rgba(255,217,61,0.18);
+      border-color: #ffd93d;
+      color: #ffd93d;
+    }
+    .upload-fab input { display: none; }
+
+    /* ── Footer ── */
+    .ftr {
+      text-align: center;
+      padding: 0.5vh 2vw 0.8vh;
+      font-size: clamp(0.6rem, 1vh, 0.82rem);
+      color: #555;
+      flex-shrink: 0;
+    }
+
+    /* ── Password Overlay ── */
+    #pwd-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0a0a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #pwd-overlay .box {
+      text-align: center;
+      padding: 2rem;
+    }
+    #pwd-overlay .title {
+      font-size: clamp(1.2rem, 3vh, 2rem);
+      color: #ffd93d;
+      margin-bottom: 1.5rem;
+    }
+    #pwd-overlay input {
+      padding: 10px 16px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #161b22;
+      color: #fff;
+      width: 220px;
+      text-align: center;
+    }
+    #pwd-overlay button {
+      margin-left: 8px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      background: #ffd93d;
+      color: #000;
+      cursor: pointer;
+    }
+    #pwd-overlay .err {
+      color: #f85149;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    /* ── Loading ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #0a0a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      color: #ffd93d;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Loading ── -->
+<div id="loading">檢查登入狀態...</div>
+
+<!-- ── Password Overlay ── -->
+<div id="pwd-overlay" style="display:none;">
+  <div class="box">
+    <div class="title">🔒 請輸入密碼</div>
+    <input id="pwd-input" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPwd()">
+    <button onclick="checkPwd()">確定</button>
+    <div id="pwd-err" class="err">密碼錯誤，請重試</div>
+  </div>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="tv" id="main-content" style="display:none;">
+  <div class="hdr">
+    <h1>🚀 新 Loyalty 上線倒數！！</h1>
+  </div>
+
+  <div class="cd">
+    <p>距離上線還有</p>
+    <div class="timer">
+      <div class="tb"><div class="n" id="days">--</div><div class="l">天 Days</div></div>
+      <div class="tb"><div class="n" id="hours">--</div><div class="l">小時 Hrs</div></div>
+      <div class="tb"><div class="n" id="mins">--</div><div class="l">分鐘 Mins</div></div>
+      <div class="tb"><div class="n" id="secs">--</div><div class="l">秒 Secs</div></div>
+    </div>
+  </div>
+
+  <div class="img-area">
+    <h3>📍 Critical Path</h3>
+    <div class="img-wrap" id="img-wrap">
+      <span class="ph">尚未上傳 Critical Path 圖片<br><small style="color:#555">點擊右上角 📎 上傳 16:9 圖片</small></span>
+      <div class="upload-fab">
+        <label for="img-upload">📎 上傳圖片
+          <input type="file" id="img-upload" accept="image/*">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="ftr" id="ftr-text">目標：2026年9月2日（香港時間）</div>
+</div>
+
+<script>
+  // ── Check authentication on load ──
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/check', {
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (data.authenticated) {
+        showMainContent();
+      } else {
+        showPasswordPrompt();
+      }
+    } catch(e) {
+      // API not available (local dev), show password prompt
+      showPasswordPrompt();
+    }
+  }
+
+  function showPasswordPrompt() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('pwd-overlay').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'none';
+  }
+
+  function showMainContent() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('pwd-overlay').style.display = 'none';
+    document.getElementById('main-content').style.display = 'flex';
+    startCountdown();
+  }
+
+  // ── Password check ──
+  async function checkPwd() {
+    const inp = document.getElementById('pwd-input');
+    const err = document.getElementById('pwd-err');
+    const password = inp.value;
+    
+    if (!password) return;
+
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password })
+      });
+      
+      if (res.ok) {
+        showMainContent();
+      } else {
+        err.style.display = 'block';
+        inp.value = '';
+        inp.focus();
+      }
+    } catch(e) {
+      err.style.display = 'block';
+      err.textContent = '登入失敗，請重試';
+      inp.value = '';
+      inp.focus();
+    }
+  }
+
+  // ── Countdown ──
+  let countdownStarted = false;
+  function startCountdown() {
+    if (countdownStarted) return;
+    countdownStarted = true;
+    tick();
+  }
+
+  const TGT = new Date('2026-09-02T00:00:00+08:00');
+  const $d = document.getElementById('days');
+  const $h = document.getElementById('hours');
+  const $m = document.getElementById('mins');
+  const $s = document.getElementById('secs');
+  const $f = document.getElementById('ftr-text');
+
+  function tick() {
+    const diff = TGT - new Date();
+    if (diff <= 0) {
+      $d.textContent = '0';
+      $h.textContent = '00';
+      $m.textContent = '00';
+      $s.textContent = '00';
+      $f.textContent = '已上線！🎉';
+      return;
+    }
+    const d = Math.floor(diff / 864e5);
+    const h = Math.floor(diff / 36e5) % 24;
+    const mn = Math.floor(diff / 6e4) % 60;
+    const sc = Math.floor(diff / 1e3) % 60;
+    $d.textContent = d;
+    $h.textContent = String(h).padStart(2, '0');
+    $m.textContent = String(mn).padStart(2, '0');
+    $s.textContent = String(sc).padStart(2, '0');
+    setTimeout(tick, 1000);
+  }
+
+  // ── Image Upload ──
+  document.getElementById('img-upload').addEventListener('change', function(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      document.getElementById('img-wrap').innerHTML =
+        `<img src="${ev.target.result}" alt="Critical Path">
+         <div class="upload-fab"><label for="img-upload2">📎 更換圖片<input type="file" id="img-upload2" accept="image/*"></label></div>`;
+      document.getElementById('img-upload2').addEventListener('change', arguments.callee);
+    };
+    r.readAsDataURL(f);
+  });
+
+  // ── Start ──
+  checkAuth();
+</script>
+</body>
+</html>
