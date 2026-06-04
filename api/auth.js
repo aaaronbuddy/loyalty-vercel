@@ -3,7 +3,7 @@ const crypto = require('crypto');
 
 // Secret key for signing cookies (in production, use environment variable)
 const SECRET = 'loyalty-2026-ctf-secret-key-change-this';
-const PASSWORD_HASH = 'a8f5f167f44f4964e6c998dee827110c86f0b2354c0e1799776b0c4ceaf3a2e1'; // SHA-256 of 'ctf2026'
+const PASSWORD_HASH = '249b43985f89a2055f9cd29cad7d293df8e767bb1fc1b5aec8de6873fadf1f6e'; // SHA-256 of 'ctf2026'
 
 function sign(data) {
   return crypto.createHmac('sha256', SECRET).update(data).digest('hex');
@@ -27,8 +27,11 @@ function verifyToken(cookie) {
 }
 
 module.exports = async (req, res) => {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  // CORS headers - mirror origin for credentials support
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   
   if (req.method === 'OPTIONS') {
