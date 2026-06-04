@@ -1,7 +1,7 @@
 // api/check.js - Vercel Serverless Function to check authentication
 const crypto = require('crypto');
 
-const SECRET = 'loyalty-2026-ctf-secret-key-change-this';
+const SECRET = process.env.AUTH_SECRET || 'loyalty-2026-ctf-secret-key-change-this';
 
 function sign(data) {
   return crypto.createHmac('sha256', SECRET).update(data).digest('hex');
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
+
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     return res.status(200).end();
@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
   const cookie = req.headers.cookie || '';
   const match = cookie.match(/loyalty_auth=([^;]+)/);
   const token = match ? match[1] : null;
-  
+
   if (verifyToken(token)) {
     return res.status(200).json({ authenticated: true });
   } else {

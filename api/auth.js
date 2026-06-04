@@ -1,9 +1,8 @@
 // api/auth.js - Vercel Serverless Function for authentication
 const crypto = require('crypto');
 
-// Secret key for signing cookies (in production, use environment variable)
-const SECRET = 'loyalty-2026-ctf-secret-key-change-this';
-const PASSWORD_HASH = '249b43985f89a2055f9cd29cad7d293df8e767bb1fc1b5aec8de6873fadf1f6e'; // SHA-256 of 'ctf2026'
+const SECRET = process.env.AUTH_SECRET || 'loyalty-2026-ctf-secret-key-change-this';
+const PASSWORD = process.env.PASSWORD || 'ctf2026';
 
 function sign(data) {
   return crypto.createHmac('sha256', SECRET).update(data).digest('hex');
@@ -33,7 +32,7 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
+
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -49,10 +48,8 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Password required' });
   }
 
-  // Hash the provided password
-  const hash = crypto.createHash('sha256').update(password).digest('hex');
-  
-  if (hash !== PASSWORD_HASH) {
+  // Compare plain text password
+  if (password !== PASSWORD) {
     return res.status(401).json({ error: 'Invalid password' });
   }
 
@@ -64,6 +61,6 @@ module.exports = async (req, res) => {
 
   // Set HttpOnly cookie
   res.setHeader('Set-Cookie', `loyalty_auth=${token}; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/`);
-  
+
   return res.status(200).json({ success: true });
 };
