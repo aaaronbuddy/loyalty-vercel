@@ -59,8 +59,8 @@ module.exports = async (req, res) => {
   const signature = sign(data);
   const token = `${data}|${signature}`;
 
-  // Set HttpOnly cookie (120 days)
-  res.setHeader('Set-Cookie', `loyalty_auth=${token}; HttpOnly; Secure; SameSite=Lax; Max-Age=${120 * 24 * 60 * 60}; Path=/`);
+  // Set HttpOnly cookie (120 days, SameSite=None for cross-origin)
+  res.setHeader('Set-Cookie', `loyalty_auth=${token}; HttpOnly; Secure; SameSite=None; Max-Age=${120 * 24 * 60 * 60}; Path=/`);
 
   return res.status(200).json({ success: true });
 };
