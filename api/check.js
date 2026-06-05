@@ -10,7 +10,9 @@ function sign(data) {
 function verifyToken(token) {
   if (!token) return false;
   try {
-    const [data, signature] = token.split('|');
+    const parts = token.split('|');
+    const signature = parts.pop();
+    const data = parts.join('|');
     const expectedSig = sign(data);
     if (signature !== expectedSig) return false;
     const [auth, timestamp] = data.split('|');
