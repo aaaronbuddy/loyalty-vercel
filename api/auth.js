@@ -16,9 +16,9 @@ function verifyToken(cookie) {
     if (signature !== expectedSig) return false;
     const [auth, timestamp] = data.split('|');
     if (auth !== 'auth=1') return false;
-    // Check if token is not too old (30 days)
+    // Check if token is not too old (120 days)
     const age = Date.now() - parseInt(timestamp);
-    if (age > 30 * 24 * 60 * 60 * 1000) return false;
+    if (age > 120 * 24 * 60 * 60 * 1000) return false;
     return true;
   } catch(e) {
     return false;
@@ -59,8 +59,8 @@ module.exports = async (req, res) => {
   const signature = sign(data);
   const token = `${data}|${signature}`;
 
-  // Set HttpOnly cookie
-  res.setHeader('Set-Cookie', `loyalty_auth=${token}; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/`);
+  // Set HttpOnly cookie (120 days)
+  res.setHeader('Set-Cookie', `loyalty_auth=${token}; HttpOnly; Secure; SameSite=Lax; Max-Age=${120 * 24 * 60 * 60}; Path=/`);
 
   return res.status(200).json({ success: true });
 };

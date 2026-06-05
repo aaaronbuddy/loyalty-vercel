@@ -16,7 +16,7 @@ function verifyToken(cookie) {
     const [auth, timestamp] = data.split('|');
     if (auth !== 'auth=1') return false;
     const age = Date.now() - parseInt(timestamp);
-    if (age > 30 * 24 * 60 * 60 * 1000) return false;
+    if (age > 120 * 24 * 60 * 60 * 1000) return false;
     return true;
   } catch(e) {
     return false;
