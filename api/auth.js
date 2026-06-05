@@ -8,25 +8,8 @@ function sign(data) {
   return crypto.createHmac('sha256', SECRET).update(data).digest('hex');
 }
 
-function verifyToken(cookie) {
-  if (!cookie) return false;
-  try {
-    const [data, signature] = cookie.split('|');
-    const expectedSig = sign(data);
-    if (signature !== expectedSig) return false;
-    const [auth, timestamp] = data.split('|');
-    if (auth !== 'auth=1') return false;
-    // Check if token is not too old (120 days)
-    const age = Date.now() - parseInt(timestamp);
-    if (age > 120 * 24 * 60 * 60 * 1000) return false;
-    return true;
-  } catch(e) {
-    return false;
-  }
-}
-
 module.exports = async (req, res) => {
-  // CORS headers - mirror origin for credentials support
+  // CORS headers
   const origin = req.headers.origin;
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
@@ -35,7 +18,7 @@ module.exports = async (req, res) => {
 
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
   }
 
@@ -48,19 +31,20 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Password required' });
   }
 
-  // Compare plain text password
   if (password !== PASSWORD) {
     return res.status(401).json({ error: 'Invalid password' });
   }
 
-  // Create signed token
+  // Create signed token (120 days expiry)
   const timestamp = Date.now().toString();
   const data = `auth=1|${timestamp}`;
   const signature = sign(data);
   const token = `${data}|${signature}`;
 
-  // Set HttpOnly cookie (120 days, SameSite=None for cross-origin)
-  res.setHeader('Set-Cookie', `loyalty_auth=${token}; HttpOnly; Secure; SameSite=None; Max-Age=${120 * 24 * 60 * 60}; Path=/`);
-
-  return res.status(200).json({ success: true });
+  // Return token in JSON response (client saves to localStorage)
+  return res.status(200).json({
+    success: true,
+    token: token,
+    expiresAt: Date.now() + 120 * 24 * 60 * 60 * 1000
+  });
 };

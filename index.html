@@ -263,20 +263,30 @@
 </div>
 
 <script>
+  const LS_KEY = 'loyalty_token';
+
   // ── Check authentication on load ──
   async function checkAuth() {
+    const token = localStorage.getItem(LS_KEY);
+    if (!token) {
+      showPasswordPrompt();
+      return;
+    }
+
     try {
       const res = await fetch('/api/check', {
-        credentials: 'include'
+        headers: { 'Authorization': 'Bearer ' + token }
       });
       const data = await res.json();
       if (data.authenticated) {
         showMainContent();
       } else {
+        // Token expired or invalid
+        localStorage.removeItem(LS_KEY);
         showPasswordPrompt();
       }
     } catch(e) {
-      // API not available (local dev), show password prompt
+      // API not available, show password prompt
       showPasswordPrompt();
     }
   }
@@ -299,18 +309,21 @@
     const inp = document.getElementById('pwd-input');
     const err = document.getElementById('pwd-err');
     const password = inp.value;
-    
+
     if (!password) return;
 
     try {
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ password })
       });
-      
-      if (res.ok) {
+
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        // Save token to localStorage
+        localStorage.setItem(LS_KEY, data.token);
         showMainContent();
       } else {
         err.style.display = 'block';

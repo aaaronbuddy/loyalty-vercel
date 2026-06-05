@@ -7,10 +7,10 @@ function sign(data) {
   return crypto.createHmac('sha256', SECRET).update(data).digest('hex');
 }
 
-function verifyToken(cookie) {
-  if (!cookie) return false;
+function verifyToken(token) {
+  if (!token) return false;
   try {
-    const [data, signature] = cookie.split('|');
+    const [data, signature] = token.split('|');
     const expectedSig = sign(data);
     if (signature !== expectedSig) return false;
     const [auth, timestamp] = data.split('|');
@@ -24,7 +24,7 @@ function verifyToken(cookie) {
 }
 
 module.exports = async (req, res) => {
-  // CORS headers - mirror origin for credentials support
+  // CORS headers
   const origin = req.headers.origin;
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
@@ -33,12 +33,20 @@ module.exports = async (req, res) => {
 
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization');
     return res.status(200).end();
   }
 
-  const cookie = req.headers.cookie || '';
-  const match = cookie.match(/loyalty_auth=([^;]+)/);
-  const token = match ? match[1] : null;
+  // Read token from Authorization header (Bear <token>) or query parameter
+  let token = null;
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  }
+  // Fallback: check query param
+  if (!token && req.query && req.query.token) {
+    token = req.query.token;
+  }
 
   if (verifyToken(token)) {
     return res.status(200).json({ authenticated: true });
